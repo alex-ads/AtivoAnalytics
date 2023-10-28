@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 
 st.set_page_config(layout="wide")
-st.title("Desempenho de Ativos")
+st.title("Ativo Analytics")
 
 ticker1 = st.text_input("Digite o ticker do primeiro ativo (por exemplo, BTC-USD):")
 ticker2 = st.text_input("Digite o ticker do segundo ativo, caso queira comparar")
