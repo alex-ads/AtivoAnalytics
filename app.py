@@ -53,9 +53,9 @@ if ticker1:
 
         # Crie o gráfico com os dados dos dois ativos, se existirem
         if 'y2' in df.columns:
-            fig_lin = px.line(df, x="ds", y=["y", "y2"])
+            fig_lin = px.line(df, x="ds", y=["y", "y2"], title=ticker1.upper()+ " | " +ticker2.upper())
         else:
-            fig_lin = px.line(df, x="ds", y="y")
+            fig_lin = px.line(df, x="ds", y="y", title=ticker1.upper())
     else:
         # Exiba uma mensagem de aviso se o DataFrame estiver vazio
         st.warning(f"Nenhum dado disponível para o ticker {ticker1} no período selecionado.")
@@ -63,7 +63,7 @@ if ticker1:
     # Exiba o gráfico
     col1[0].plotly_chart(fig_lin, use_container_width=True)
 
-    fig_bar = px.bar(df, x="ds", y="Volume")
+    fig_bar = px.bar(df, x="ds", y="Volume", title="Volume de Negociação " + ticker1.upper())
     col2.plotly_chart(fig_bar, use_container_width=True)  
 
 
@@ -84,7 +84,7 @@ if ticker1:
     df = pd.DataFrame({'Metrica': ['Preço Inicial', 'Preço Final', 'Retorno'], 'Valor': [preco_inicial, preco_final, retorno]})
     
     # Apresente os resultados
-    fig_bar1 = px.bar(df, x="Metrica", y="Valor")
+    fig_bar1 = px.bar(df, x="Metrica", y="Valor", title="Retorno de acordo com o período ")
     fig_bar1.add_annotation(x='Preço Inicial', y=preco_inicial, text=f"$ {preco_inicial:.2f}")
     fig_bar1.add_annotation(x='Preço Final', y=preco_final, text=f"$ {preco_final:.2f}")
     fig_bar1.add_annotation(x='Retorno', y=retorno, text=f"$ {retorno:.2f}")
