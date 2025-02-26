@@ -18,41 +18,47 @@ def baixar_dados(ticker, dias):
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
-        df = pd.DataFrame(data['prices'], columns=['ds', 'y'])
-        df['ds'] = pd.to_datetime(df['ds'], unit='ms')
-        df['volume'] = [v[1] for v in data['total_volumes']]
+        df = pd.DataFrame(data['prices'], columns=['Data', 'Preço (USD)'])
+        df['Data'] = pd.to_datetime(df['Data'], unit='ms')
+        df['Volume'] = [v[1] for v in data['total_volumes']]
         return df
     else:
         return None
 
-col1, col2, col3 = st.columns([2, 1, 1])
+# Ajuste de layout para melhor exibição dos gráficos
+st.write("---")
 
 # Verifica se o primeiro ticker foi inserido
 if ticker1:
     df1 = baixar_dados(ticker1, periodo)
     if df1 is not None:
-        preco_inicial = df1['y'].iloc[0]
-        preco_final = df1['y'].iloc[-1]
+        preco_inicial = df1['Preço (USD)'].iloc[0]
+        preco_final = df1['Preço (USD)'].iloc[-1]
         retorno = preco_final - preco_inicial
         
+        # Criar gráficos
         if ticker2:
             df2 = baixar_dados(ticker2, periodo)
             if df2 is not None:
-                df2.rename(columns={'y': 'y2'}, inplace=True)
-                df = pd.merge(df1, df2, on='ds', how='outer')
-                fig_lin = px.line(df, x='ds', y=['y', 'y2'], title=f"{ticker1.upper()} vs {ticker2.upper()}")
+                df2.rename(columns={'Preço (USD)': f'Preço (USD) - {ticker2.upper()}'}, inplace=True)
+                df = pd.merge(df1, df2, on='Data', how='outer')
+                fig_lin = px.line(df, x='Data', y=[f'Preço (USD)', f'Preço (USD) - {ticker2.upper()}'], 
+                                  title=f"{ticker1.upper()} vs {ticker2.upper()}", 
+                                  labels={'Data': 'Data', 'value': 'Preço (USD)'})
             else:
                 st.warning(f"Não foi possível obter dados para {ticker2}.")
-                fig_lin = px.line(df1, x='ds', y='y', title=f"Preço de {ticker1.upper()}")
+                fig_lin = px.line(df1, x='Data', y='Preço (USD)', title=f"Preço de {ticker1.upper()}")
         else:
-            fig_lin = px.line(df1, x='ds', y='y', title=f"Preço de {ticker1.upper()}")
-
+            fig_lin = px.line(df1, x='Data', y='Preço (USD)', title=f"Preço de {ticker1.upper()}")
+        
+        # Organiza os gráficos em colunas menores
+        col1, col2, col3 = st.columns([1, 1, 1])
         col1.plotly_chart(fig_lin, use_container_width=True)
-
+        
         # Gráfico de volume
-        fig_vol = px.bar(df1, x='ds', y='volume', title=f"Volume de Negociação - {ticker1.upper()}")
+        fig_vol = px.bar(df1, x='Data', y='Volume', title=f"Volume de Negociação - {ticker1.upper()}")
         col2.plotly_chart(fig_vol, use_container_width=True)
-
+        
         # Gráfico de retorno
         df_retorno = pd.DataFrame({'Métrica': ['Preço Inicial', 'Preço Final', 'Retorno'], 'Valor': [preco_inicial, preco_final, retorno]})
         fig_bar = px.bar(df_retorno, x="Métrica", y="Valor", title="Retorno do Ativo")
